@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>aifree.in.th</title>
+<meta name="description" content="เครื่องมือออนไลน์ฟรี ใช้งานได้ทันทีบนมือถือและคอมพิวเตอร์">
+<meta property="og:title" content="aifree.in.th">
+<meta property="og:description" content="เครื่องมือออนไลน์ฟรี ใช้งานได้ทันทีบนมือถือและคอมพิวเตอร์">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="logo" href="/"><span class="logo-mark">AI</span><span>aifree<small>.in.th</small></span></a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <h1>เครื่องมือออนไลน์ฟรี</h1>
+    <p>ใช้ได้ทันทีบนมือถือและคอมพิวเตอร์ ไม่ต้องสมัครสมาชิก ไม่ต้องติดตั้งแอป</p>
+  </section>
+
+  <div class="bar" id="bar" hidden>
+    <input class="search" id="q" type="search" placeholder="ค้นหาเครื่องมือ" aria-label="ค้นหาเครื่องมือ">
+    <div class="chips" id="chips" role="group" aria-label="หมวดหมู่"></div>
+  </div>
+
+  <div class="grid" id="grid" aria-live="polite"></div>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <span>© <span id="yr"></span> aifree.in.th</span>
+    <span>เครื่องมือแต่ละตัวบอกไว้ในหน้าของตัวเองว่าเก็บข้อมูลอะไรบ้าง</span>
+  </div>
+</footer>
+
+<script src="apps.js"></script>
+<script>
+(function(){
+  const apps=window.APPS||[],grid=document.getElementById('grid'),q=document.getElementById('q'),chips=document.getElementById('chips');
+  document.getElementById('yr').textContent=new Date().getFullYear()+543;
+  let tag='';
+  const tags=[...new Set(apps.flatMap(a=>a.tags||[]))];
+  // search + filter appear once there are enough tools to need them
+  if(apps.length>=5){document.getElementById('bar').hidden=false}
+  ['ทั้งหมด',...tags].forEach((t,i)=>{
+    const b=document.createElement('button');b.className='chip';b.type='button';b.textContent=t;b.setAttribute('aria-pressed',i===0);
+    b.onclick=()=>{tag=i===0?'':t;chips.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));draw()};
+    chips.append(b);
+  });
+  q.addEventListener('input',draw);
+  function draw(){
+    const s=q.value.trim().toLowerCase();grid.innerHTML='';
+    const list=apps.filter(a=>(!tag||(a.tags||[]).includes(tag))&&(!s||(a.name+' '+a.desc+' '+(a.tags||[]).join(' ')).toLowerCase().includes(s)));
+    if(!list.length){const e=document.createElement('div');e.className='empty';e.textContent='ไม่พบเครื่องมือที่ค้นหา';grid.append(e);return}
+    list.forEach(a=>{
+      const c=document.createElement('a');c.className='card';c.href=a.href;
+      if(/^https?:/.test(a.href)&&!a.href.includes(location.host)){c.target='_blank';c.rel='noopener'}
+      const top=document.createElement('div');top.className='card-top';
+      const tile=document.createElement('span');tile.className='tile';tile.style.background=a.color||'#1f45b5';tile.textContent=a.short||a.name.slice(0,2);tile.setAttribute('aria-hidden','true');
+      const h=document.createElement('h2');h.textContent=a.name;top.append(tile,h);
+      const p=document.createElement('p');p.textContent=a.desc||'';
+      const tg=document.createElement('div');tg.className='tags';
+      if(a.isNew){const n=document.createElement('span');n.className='tag new';n.textContent='ใหม่';tg.append(n)}
+      (a.tags||[]).forEach(t=>{const x=document.createElement('span');x.className='tag';x.textContent=t;tg.append(x)});
+      const go=document.createElement('span');go.className='go';go.textContent='เปิดใช้งาน →';
+      c.append(top,p,tg,go);grid.append(c);
+    });
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
